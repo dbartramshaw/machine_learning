@@ -1,10 +1,8 @@
-################################################################################################################
-# An implementation of matrix factorization from Scratch
-################################################################################################################
-
-import numpy
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
+    Matrix Factorisation using Numpy and scikit
     An implementation of matrix factorization from Scratch
 
     -----------
@@ -23,6 +21,8 @@ import numpy
     the final matrices P and Q
 
 """
+import numpy
+
 def matrix_factorization(R, P, Q, K, steps=5000, alpha=0.0002, beta=0.02):
     Q = Q.T
     for step in xrange(steps):
@@ -48,9 +48,6 @@ def matrix_factorization(R, P, Q, K, steps=5000, alpha=0.0002, beta=0.02):
         if e < 0.001:
             break
     return P, Q.T
-
-
-
 
 
 ###################
@@ -88,24 +85,27 @@ def matrix_factorization(R, P, Q, K, steps=5000, alpha=0.0002, beta=0.02):
     nQ
 
 
-################################################################################################################
-# sklearn Non-Negative Matrix Factorisation
-################################################################################################################
+
+
 """
-Find two non-negative matrices (W, H) whose product approximates the non- negative matrix X.
-This factorization can be used for example for dimensionality reduction, source separation or topic extraction.
+    sklearn Non-Negative Matrix Factorisation
+
+    Find two non-negative matrices (W, H) whose product approximates the non- negative matrix X.
+    This factorization can be used for example for dimensionality reduction, source separation or topic extraction.
 
 
-# Objective function
-0.5 * ||X - WH||_Fro^2
-+ alpha * l1_ratio * ||vec(W)||_1
-+ alpha * l1_ratio * ||vec(H)||_1
-+ 0.5 * alpha * (1 - l1_ratio) * ||W||_Fro^2
-+ 0.5 * alpha * (1 - l1_ratio) * ||H||_Fro^2
+    # Objective function
+    -----------
+    0.5 * ||X - WH||_Fro^2
+    + alpha * l1_ratio * ||vec(W)||_1
+    + alpha * l1_ratio * ||vec(H)||_1
+    + 0.5 * alpha * (1 - l1_ratio) * ||W||_Fro^2
+    + 0.5 * alpha * (1 - l1_ratio) * ||H||_Fro^2
 
-# Where:
-||A||_Fro^2 = \sum_{i,j} A_{ij}^2 (Frobenius norm)
-||vec(A)||_1 = \sum_{i,j} abs(A_{ij}) (Elementwise L1 norm)
+    # Where:
+    -----------
+    ||A||_Fro^2 = \sum_{i,j} A_{ij}^2 (Frobenius norm)
+    ||vec(A)||_1 = \sum_{i,j} abs(A_{ij}) (Elementwise L1 norm)
 """
 
 
@@ -124,6 +124,57 @@ print model.reconstruction_err_
 
 # Actual number of iterations.
 print model.n_iter_
+
+
+
+
+
+"""
+    sklearn Non-Negative Matrix Factorisation
+    Newsgroup data example
+
+    # Load the 20 newsgroups dataset and vectorize it. We use a few heuristics
+    # to filter out useless terms early on: the posts are stripped of headers,
+    # footers and quoted replies, and common English words, words occurring in
+    # only one document or in at least 95% of the documents are removed.
+
+"""
+from __future__ import print_function
+from time import time
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import NMF
+from sklearn.datasets import fetch_20newsgroups
+
+n_samples = 2000
+n_features = 1000
+n_topics = 10
+n_top_words = 20
+
+t0 = time()
+print("Loading dataset and extracting TF-IDF features...")
+dataset = fetch_20newsgroups(shuffle=True, random_state=1,
+                             remove=('headers', 'footers', 'quotes'))
+
+vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, max_features=n_features,
+                             stop_words='english')
+tfidf = vectorizer.fit_transform(dataset.data[:n_samples])
+print("done in %0.3fs." % (time() - t0))
+
+# Fit the NMF model
+print("Fitting the NMF model with n_samples=%d and n_features=%d..."
+      % (n_samples, n_features))
+nmf = NMF(n_components=n_topics, random_state=1).fit(tfidf)
+print("done in %0.3fs." % (time() - t0))
+
+
+feature_names = vectorizer.get_feature_names()
+
+for topic_idx, topic in enumerate(nmf.components_):
+    print("Topic #%d:" % topic_idx)
+    print(" ".join([feature_names[i]
+                    for i in topic.argsort()[:-n_top_words - 1:-1]]))
+    print()
 
 
 
