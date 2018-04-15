@@ -22,7 +22,6 @@
 
 """
 import numpy
-
 def matrix_factorization(R, P, Q, K, steps=5000, alpha=0.0002, beta=0.02):
     Q = Q.T
     for step in xrange(steps):
@@ -111,7 +110,6 @@ def matrix_factorization(R, P, Q, K, steps=5000, alpha=0.0002, beta=0.02):
 
 import numpy as np
 from sklearn.decomposition import NMF
-
 X = np.array([[1,1], [2, 1], [3, 1.2], [4, 1], [5, 0.8], [6, 1]])
 
 model = NMF(n_components=6, init='random', random_state=0)
